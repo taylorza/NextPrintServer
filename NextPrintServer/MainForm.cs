@@ -25,8 +25,23 @@ namespace NextPrintServer
         private void Form1_Load(object sender, EventArgs e)
         {
             AddAboutMenu();
+
+            if (string.IsNullOrEmpty(Properties.Settings.Default.Printer))
+            {
+                txtPrinter.Text = _pd.PrinterSettings.PrinterName;
+            }
+            else
+            {
+                txtPrinter.Text = Properties.Settings.Default.Printer;
+                _pd.PrinterSettings.PrinterName = Properties.Settings.Default.Printer;
+            }
+
+            if (Properties.Settings.Default.PrintFont != null)
+            {
+                _font = Properties.Settings.Default.PrintFont;
+            }
             UpdateFont(_font);
-            txtPrinter.Text = _pd.PrinterSettings.PrinterName;
+            
             
             new Thread(PrintListener)
             {
@@ -90,6 +105,8 @@ namespace NextPrintServer
                 _font?.Dispose();
                 _font = fontDlg.Font;
                 UpdateFont(_font);
+                Properties.Settings.Default.PrintFont = _font;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -100,6 +117,8 @@ namespace NextPrintServer
             {
                 _pd = printDlg.Document;
                 txtPrinter.Text = _pd.PrinterSettings.PrinterName;
+                Properties.Settings.Default.Printer = _pd.PrinterSettings.PrinterName;
+                Properties.Settings.Default.Save();
             }
         }
 
