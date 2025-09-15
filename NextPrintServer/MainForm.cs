@@ -1,6 +1,7 @@
+using System.Drawing;
 using System.Drawing.Printing;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 
 namespace NextPrintServer
 {
@@ -8,8 +9,8 @@ namespace NextPrintServer
     {
         private bool _hidden = false;
         private bool _forceClose = false;
-
-        private Font _font = new("Courier New", 10);
+        
+        private Font _font = new("Consolas", 10);
         private PrintDocument _pd = new();
         private Bitmap? _previewImage;
         private Graphics? _previewGraphics;
@@ -133,9 +134,11 @@ namespace NextPrintServer
             _previewGraphics.FillRectangle(Brushes.White, 0, 0, _previewImage.Width, _previewImage.Height);
             pnlPreview.Refresh();
         }
-        public void PreviewAddLine(string s, float x, float y)
+
+        public void PreviewAddChar(char c, Font font, bool underline, Brush brush, Pen pen, float x, float y, float w, float h)
         {
-            _previewGraphics?.DrawString(s, _font, Brushes.Black, x, y);
+            _previewGraphics?.DrawString(c.ToString(), font, brush, x, y);
+            if (underline) _previewGraphics?.DrawLine(pen, x, y + h - 1, x + w, y + h - 1);
             pnlPreview.Refresh();
         }
 
