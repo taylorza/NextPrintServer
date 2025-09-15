@@ -8,8 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
 
-      <Version>0.2.1</Version>
-      <AssemblyVersion>0.2.1</AssemblyVersion>
+      <Version>0.2.2</Version>
+      <AssemblyVersion>0.2.2</AssemblyVersion>
       <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 

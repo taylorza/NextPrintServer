@@ -205,6 +205,7 @@ namespace NextPrintServer
                                 _currentStyle = FontStyle.Regular;
                                 _currentFont = _fontManager.GetFont(_currentStyle);
                                 _currentBrush = _brushManager.GetBrush(Color.Black);
+                                _currentPen = _penManager.GetPen(Color.Black);
                                 _underline = false;
                                 break;
                             case (int)'E': // Bold on
