@@ -4,15 +4,15 @@ Windows Printer Server to support Network Printing from the ZX Spectrum Next usi
 
 ## Features
 - Supports any Windows Printer, local or networked
-- Use any intalled Windows font
-- Supports a subset of the EPSON ESC/POS command set, inclunding color printing
+- Use any installed Windows font
+- Supports a subset of the EPSON ESC/POS command set, including color printing
 - Printing ZX Spectrum special characters (©, £, ↑, ▝, ▘, ▀, ▗, ▐, ▚, ▌, ▛,  ▄, ▟, ▙, █)
 - Print preview
 
 ## Supported ESC/POS Commands
 | Command | Description |
 |---------|-------------|
-| `ESC @` | Initialize Printer |
+| `ESC @` | Initialize/Reset Printer |
 | `ESC E` | Enable Bold Mode |
 | `ESC F` | Disable Bold Mode |
 | `ESC 4` | Enable Italics |
