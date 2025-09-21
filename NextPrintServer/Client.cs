@@ -65,7 +65,7 @@ namespace NextPrintServer
 
             _currentFont = _fontManager.GetFont(FontStyle.Regular);
             _currentBrush = _brushManager.GetBrush(Color.Black);
-            _currentPen = _penManager.GetPen(Color.Black);
+            _currentPen = _penManager.GetPen(Color.Black);            
         }
 
         internal void Print(PrintDocument pd)
@@ -107,7 +107,14 @@ namespace NextPrintServer
 
             _form.Invoke(new Action(() => _form.PreviewNewPage(rightMargin - leftMargin, bottomMargin - topMargin)));
 
-            Font font = _font;
+            Region[]? regions = null;
+            SizeF size;
+            float lastCharWidth;
+
+            regions = e.Graphics.MeasureCharacterRanges("i", _currentFont, RectangleF.Empty, stringFormat);
+            size = regions[0].GetBounds(e.Graphics).Size;
+            lastCharWidth = size.Width;
+            
             while ((ypos + lineHeight) < bottomMargin)
             {
                 int ch;
@@ -157,6 +164,123 @@ namespace NextPrintServer
                         {
                             switch (ch)
                             {
+                                case 6:
+                                    {
+                                        // tab half the line width
+                                        regions = e.Graphics.MeasureCharacterRanges("i", _currentFont, RectangleF.Empty, stringFormat);
+                                        size = regions[0].GetBounds(e.Graphics).Size;
+
+                                        int halfCharsPerLine = (int)((rightMargin - leftMargin) / size.Width) / 2;
+                                        float tabX = leftMargin;
+                                        while (halfCharsPerLine-- > 0) tabX += size.Width;
+
+                                        if (xpos < tabX)
+                                        {
+                                            xpos = tabX;
+                                        } 
+                                        else 
+                                        { 
+                                            xpos = leftMargin;
+                                            if ((ypos + lineHeight) > bottomMargin)
+                                            {
+                                                hasMorePages = true;
+                                                ffSeen = false;
+                                                break;
+                                            }
+                                            ypos += lineHeight;
+                                        }
+                                    }
+                                    break;
+                                case 8:
+                                    if (xpos - lastCharWidth < leftMargin)
+                                    {
+                                        if (ypos == topMargin)
+                                        {
+                                            xpos = leftMargin;
+                                        }
+                                        else
+                                        {
+                                            xpos = rightMargin - lastCharWidth;
+                                            ypos -= lineHeight;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        xpos -= lastCharWidth;
+                                    }
+                                    break;
+                                case 9:
+                                    if (xpos + lastCharWidth > rightMargin)
+                                    {
+                                        ypos += lineHeight;
+                                        if ((ypos + lineHeight) > bottomMargin)
+                                        {
+                                            hasMorePages = true;
+                                            ffSeen = false;
+                                            break;
+                                        }
+                                        xpos = leftMargin;
+                                    }
+                                    else
+                                    {
+                                        xpos += lastCharWidth;
+                                    }
+                                    break;
+                                case 0x16: // AT y,x
+                                    int y = _stream.ReadByte();
+                                    if (y == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int x = _stream.ReadByte();
+                                    if (x == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+
+                                    float newYpos = topMargin + (y * lineHeight);
+                                    if (newYpos < topMargin) newYpos = topMargin;
+                                    if (newYpos > bottomMargin - lineHeight) newYpos = bottomMargin - lineHeight;
+                                    ypos = newYpos;
+                                    float newXpos = leftMargin + (x * lastCharWidth);
+                                    if (newXpos < leftMargin) newXpos = leftMargin;
+                                    if (newXpos > rightMargin - lastCharWidth) newXpos = rightMargin - lastCharWidth;
+                                    xpos = newXpos;
+                                    break;
+                                case 0x10: // Ink color
+                                    {
+                                        int color = _stream.ReadByte();
+                                        if (color == -1)
+                                        {
+                                            e.HasMorePages = false;
+                                            return;
+                                        }
+                                        SetInkColor(color);
+                                    }
+                                    break;
+                                case 23: // Tab control
+                                    int a = _stream.ReadByte();
+                                    if (a == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int b = _stream.ReadByte();
+                                    if (b == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int spaces = a+(b*256);
+                                    regions = e.Graphics.MeasureCharacterRanges('i'.ToString(), _currentFont, RectangleF.Empty, stringFormat);
+                                    float spaceWidth = regions[0].GetBounds(e.Graphics).Size.Width;
+                                    lastCharWidth = spaceWidth;
+                                    float tabWidth = spaceWidth * spaces;
+                                    xpos += tabWidth - ((xpos - leftMargin) % tabWidth);
+                                    if (xpos > rightMargin) xpos = leftMargin + (xpos - rightMargin);
+                                    break;
                                 case 10:
                                     // Ignore LF
                                     break;
@@ -169,9 +293,9 @@ namespace NextPrintServer
                                     char measureChar = c;
                                     if (measureChar == ' ') measureChar = 'i';
 
-                                    var regions = e.Graphics.MeasureCharacterRanges(measureChar.ToString(), font, RectangleF.Empty, stringFormat);
-                                    SizeF size = regions[0].GetBounds(e.Graphics).Size;
-
+                                    regions = e.Graphics.MeasureCharacterRanges(measureChar.ToString(), _currentFont, RectangleF.Empty, stringFormat);
+                                    size = regions[0].GetBounds(e.Graphics).Size;
+                                    lastCharWidth = size.Width;
                                     if (xpos + size.Width > rightMargin)
                                     {
                                         ypos += lineHeight;
@@ -184,7 +308,7 @@ namespace NextPrintServer
                                         }
                                         xpos = leftMargin;
                                     }
-
+                                    
                                     e.Graphics.DrawString(c.ToString(), _currentFont, _currentBrush, xpos, ypos);
                                     if (_underline)
                                     {
@@ -242,44 +366,7 @@ namespace NextPrintServer
                                     return;
                                 }
                                 if (ch >= '0') ch -= '0'; // Convert from ASCII
-                                switch (ch)
-                                {
-                                    case 0: // Black
-                                        _currentBrush = _brushManager.GetBrush(Color.Black);
-                                        _currentPen = _penManager.GetPen(Color.Black);
-                                        break;
-                                    case 1: // Blue
-                                        _currentBrush = _brushManager.GetBrush(Color.Blue);
-                                        _currentPen = _penManager.GetPen(Color.Blue);
-                                        break;
-                                    case 2: // Red
-                                        _currentBrush = _brushManager.GetBrush(Color.Red);
-                                        _currentPen = _penManager.GetPen(Color.Red);
-                                        break;
-                                    case 3: // Magenta
-                                        _currentBrush = _brushManager.GetBrush(Color.Magenta);
-                                        _currentPen = _penManager.GetPen(Color.Magenta);
-                                        break;
-                                    case 4: // Green
-                                        _currentBrush = _brushManager.GetBrush(Color.Green);
-                                        _currentPen = _penManager.GetPen(Color.Green);
-                                        break;
-                                    case 5: // Cyan
-                                        _currentBrush = _brushManager.GetBrush(Color.Cyan);
-                                        _currentPen = _penManager.GetPen(Color.Cyan);
-                                        break;
-                                    case 6: // Yellow
-                                        _currentBrush = _brushManager.GetBrush(Color.Yellow);
-                                        _currentPen = _penManager.GetPen(Color.Yellow);
-                                        break;
-                                    case 7: // White
-                                        _currentBrush = _brushManager.GetBrush(Color.LightGray);
-                                        _currentPen = _penManager.GetPen(Color.LightGray);
-                                        break;
-                                    default:
-                                        // Unknown color - ignore it.
-                                        break;
-                                }
+                                SetInkColor(ch);
                                 break;
 
                             default:
@@ -291,6 +378,29 @@ namespace NextPrintServer
                 }
             }
             e.HasMorePages = hasMorePages;
+        }
+
+        private Color MapToZXColor(int color)
+        {
+            return color switch
+            {
+                0 => Color.Black,
+                1 => Color.Blue,
+                2 => Color.Red,
+                3 => Color.Magenta,
+                4 => Color.Green,
+                5 => Color.Cyan,
+                6 => Color.Yellow,
+                7 => Color.LightGray,
+                _ => Color.Black,
+            };
+        }
+
+        private void SetInkColor(int color)
+        {
+            Color c = MapToZXColor(color);
+            _currentBrush = _brushManager.GetBrush(c);
+            _currentPen = _penManager.GetPen(c);
         }
     }
 

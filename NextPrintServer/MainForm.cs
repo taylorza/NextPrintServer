@@ -2,6 +2,7 @@ using System.Drawing;
 using System.Drawing.Printing;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Policy;
 
 namespace NextPrintServer
 {
@@ -9,7 +10,7 @@ namespace NextPrintServer
     {
         private bool _hidden = false;
         private bool _forceClose = false;
-        
+
         private Font _font = new("Consolas", 10);
         private PrintDocument _pd = new();
         private Bitmap? _previewImage;
@@ -42,8 +43,8 @@ namespace NextPrintServer
                 _font = Properties.Settings.Default.PrintFont;
             }
             UpdateFont(_font);
-            
-            
+
+
             new Thread(PrintListener)
             {
                 IsBackground = true
@@ -83,11 +84,11 @@ namespace NextPrintServer
                     Invoke(() => txtStatus.Text = Resources.strWaitingForConnection);
                     using var tcpClient = server.AcceptTcpClient();
                     Invoke(() => txtStatus.Text = string.Format(Resources.strConnectionFrom, tcpClient.Client.RemoteEndPoint));
-                    new Client(_font, tcpClient, this).Print(_pd);                    
+                    new Client(_font, tcpClient, this).Print(_pd);
                 }
                 catch (Exception ex)
                 {
-                    Invoke(()=>txtStatus.Text = ex.Message);
+                    Invoke(() => txtStatus.Text = ex.Message);
                 }
             }
         }
@@ -181,7 +182,7 @@ namespace NextPrintServer
             ShowForm();
         }
 
-        
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _forceClose = true;
@@ -196,6 +197,12 @@ namespace NextPrintServer
         private void AddAboutMenu()
         {
 
+        }
+
+        private void iPAddressToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IpAddressForm f = new();
+            f.ShowDialog(this);
         }
     }
 }

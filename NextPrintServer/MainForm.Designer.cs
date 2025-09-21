@@ -47,14 +47,18 @@ namespace NextPrintServer
             openToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             exitToolStripMenuItem = new ToolStripMenuItem();
+            menuStrip1 = new MenuStrip();
+            ipAddressMenuItem = new ToolStripMenuItem();
+            iPAddressToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
+            menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // lblFont
             // 
             lblFont.AutoSize = true;
-            lblFont.Location = new Point(12, 38);
+            lblFont.Location = new Point(12, 63);
             lblFont.Name = "lblFont";
             lblFont.Size = new Size(31, 15);
             lblFont.TabIndex = 4;
@@ -63,16 +67,16 @@ namespace NextPrintServer
             // txtFont
             // 
             txtFont.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtFont.Location = new Point(60, 35);
+            txtFont.Location = new Point(60, 60);
             txtFont.Name = "txtFont";
             txtFont.ReadOnly = true;
-            txtFont.Size = new Size(206, 23);
+            txtFont.Size = new Size(223, 23);
             txtFont.TabIndex = 5;
             // 
             // btnFont
             // 
             btnFont.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnFont.Location = new Point(265, 35);
+            btnFont.Location = new Point(282, 60);
             btnFont.Name = "btnFont";
             btnFont.Size = new Size(30, 23);
             btnFont.TabIndex = 6;
@@ -83,7 +87,7 @@ namespace NextPrintServer
             // lblPrinter
             // 
             lblPrinter.AutoSize = true;
-            lblPrinter.Location = new Point(12, 13);
+            lblPrinter.Location = new Point(12, 38);
             lblPrinter.Name = "lblPrinter";
             lblPrinter.Size = new Size(42, 15);
             lblPrinter.TabIndex = 1;
@@ -92,7 +96,7 @@ namespace NextPrintServer
             // btnPrinter
             // 
             btnPrinter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            btnPrinter.Location = new Point(265, 9);
+            btnPrinter.Location = new Point(282, 34);
             btnPrinter.Name = "btnPrinter";
             btnPrinter.Size = new Size(30, 23);
             btnPrinter.TabIndex = 3;
@@ -103,18 +107,18 @@ namespace NextPrintServer
             // txtPrinter
             // 
             txtPrinter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            txtPrinter.Location = new Point(60, 9);
+            txtPrinter.Location = new Point(60, 34);
             txtPrinter.Name = "txtPrinter";
             txtPrinter.ReadOnly = true;
-            txtPrinter.Size = new Size(206, 23);
+            txtPrinter.Size = new Size(223, 23);
             txtPrinter.TabIndex = 2;
             // 
             // statusStrip1
             // 
             statusStrip1.Items.AddRange(new ToolStripItem[] { txtStatus });
-            statusStrip1.Location = new Point(0, 428);
+            statusStrip1.Location = new Point(0, 499);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(307, 22);
+            statusStrip1.Size = new Size(324, 22);
             statusStrip1.TabIndex = 8;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -128,9 +132,9 @@ namespace NextPrintServer
             pnlPreview.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             pnlPreview.BackColor = Color.White;
             pnlPreview.BorderStyle = BorderStyle.FixedSingle;
-            pnlPreview.Location = new Point(12, 75);
+            pnlPreview.Location = new Point(12, 96);
             pnlPreview.Name = "pnlPreview";
-            pnlPreview.Size = new Size(283, 337);
+            pnlPreview.Size = new Size(300, 388);
             pnlPreview.TabIndex = 99;
             pnlPreview.Paint += pnlPreview_Paint;
             pnlPreview.Resize += pnlPreview_Resize;
@@ -168,13 +172,37 @@ namespace NextPrintServer
             exitToolStripMenuItem.Text = "E&xit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
+            // menuStrip1
+            // 
+            menuStrip1.Items.AddRange(new ToolStripItem[] { ipAddressMenuItem });
+            menuStrip1.Location = new Point(0, 0);
+            menuStrip1.Name = "menuStrip1";
+            menuStrip1.Size = new Size(324, 24);
+            menuStrip1.TabIndex = 100;
+            menuStrip1.Text = "menuStrip1";
+            // 
+            // ipAddressMenuItem
+            // 
+            ipAddressMenuItem.DropDownItems.AddRange(new ToolStripItem[] { iPAddressToolStripMenuItem });
+            ipAddressMenuItem.Name = "ipAddressMenuItem";
+            ipAddressMenuItem.Size = new Size(44, 20);
+            ipAddressMenuItem.Text = "Help";
+            // 
+            // iPAddressToolStripMenuItem
+            // 
+            iPAddressToolStripMenuItem.Name = "iPAddressToolStripMenuItem";
+            iPAddressToolStripMenuItem.Size = new Size(129, 22);
+            iPAddressToolStripMenuItem.Text = "IP Address";
+            iPAddressToolStripMenuItem.Click += iPAddressToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(307, 450);
+            ClientSize = new Size(324, 521);
             Controls.Add(pnlPreview);
             Controls.Add(statusStrip1);
+            Controls.Add(menuStrip1);
             Controls.Add(txtPrinter);
             Controls.Add(btnPrinter);
             Controls.Add(lblPrinter);
@@ -182,6 +210,7 @@ namespace NextPrintServer
             Controls.Add(txtFont);
             Controls.Add(lblFont);
             Icon = (Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = menuStrip1;
             Name = "MainForm";
             Text = "ZX Spectrum Next Print Server";
             FormClosing += MainForm_FormClosing;
@@ -189,6 +218,8 @@ namespace NextPrintServer
             statusStrip1.ResumeLayout(false);
             statusStrip1.PerformLayout();
             contextMenuStrip1.ResumeLayout(false);
+            menuStrip1.ResumeLayout(false);
+            menuStrip1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -211,5 +242,8 @@ namespace NextPrintServer
         private ToolStripMenuItem openToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem exitToolStripMenuItem;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem ipAddressMenuItem;
+        private ToolStripMenuItem iPAddressToolStripMenuItem;
     }
 }
