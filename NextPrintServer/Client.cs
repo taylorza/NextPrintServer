@@ -65,7 +65,7 @@ namespace NextPrintServer
 
             _currentFont = _fontManager.GetFont(FontStyle.Regular);
             _currentBrush = _brushManager.GetBrush(Color.Black);
-            _currentPen = _penManager.GetPen(Color.Black);            
+            _currentPen = _penManager.GetPen(Color.Black);
         }
 
         internal void Print(PrintDocument pd)
@@ -114,7 +114,7 @@ namespace NextPrintServer
             regions = e.Graphics.MeasureCharacterRanges("i", _currentFont, RectangleF.Empty, stringFormat);
             size = regions[0].GetBounds(e.Graphics).Size;
             lastCharWidth = size.Width;
-            
+
             while ((ypos + lineHeight) < bottomMargin)
             {
                 int ch;
@@ -177,9 +177,9 @@ namespace NextPrintServer
                                         if (xpos < tabX)
                                         {
                                             xpos = tabX;
-                                        } 
-                                        else 
-                                        { 
+                                        }
+                                        else
+                                        {
                                             xpos = leftMargin;
                                             if ((ypos + lineHeight) > bottomMargin)
                                             {
@@ -273,7 +273,7 @@ namespace NextPrintServer
                                         e.HasMorePages = false;
                                         return;
                                     }
-                                    int spaces = a+(b*256);
+                                    int spaces = a + (b * 256);
                                     regions = e.Graphics.MeasureCharacterRanges('i'.ToString(), _currentFont, RectangleF.Empty, stringFormat);
                                     float spaceWidth = regions[0].GetBounds(e.Graphics).Size.Width;
                                     lastCharWidth = spaceWidth;
@@ -308,13 +308,13 @@ namespace NextPrintServer
                                         }
                                         xpos = leftMargin;
                                     }
-                                    
+
                                     e.Graphics.DrawString(c.ToString(), _currentFont, _currentBrush, xpos, ypos);
                                     if (_underline)
                                     {
-                                        e.Graphics.DrawLine(_currentPen, xpos, ypos + lineHeight - 1, xpos + size.Width*1.3f, ypos + lineHeight - 1);
+                                        e.Graphics.DrawLine(_currentPen, xpos, ypos + lineHeight - 1, xpos + size.Width * 1.3f, ypos + lineHeight - 1);
                                     }
-                                    _form.Invoke(new Action(() => _form.PreviewAddChar(c, _currentFont, _underline, _currentBrush, _currentPen, xpos, ypos, size.Width*1.3f, lineHeight)));
+                                    _form.Invoke(new Action(() => _form.PreviewAddChar(c, _currentFont, _underline, _currentBrush, _currentPen, xpos, ypos, size.Width * 1.3f, lineHeight)));
 
                                     xpos += size.Width;
                                     break;
@@ -356,7 +356,7 @@ namespace NextPrintServer
                                     return;
                                 }
                                 if (ch >= '0') ch -= '0'; // Convert from ASCII
-                                _underline = ch != 0;                    
+                                _underline = ch != 0;
                                 break;
                             case (int)'r': // Color
                                 ch = _stream.ReadByte();
@@ -367,6 +367,76 @@ namespace NextPrintServer
                                 }
                                 if (ch >= '0') ch -= '0'; // Convert from ASCII
                                 SetInkColor(ch);
+                                break;
+
+                            case (int)'g': // Print RGB bitmap
+                                {
+                                    int widthLow = _stream.ReadByte();
+                                    if (widthLow == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int widthHigh = _stream.ReadByte();
+                                    if (widthHigh == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int width = widthLow + (widthHigh * 256);
+
+                                    int heightLow = _stream.ReadByte();
+                                    if (heightLow == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int heightHigh = _stream.ReadByte();
+                                    if (heightHigh == -1)
+                                    {
+                                        e.HasMorePages = false;
+                                        return;
+                                    }
+                                    int height = heightLow + (heightHigh * 256);
+                                    int bytesPerRow = width * 3; // 3 bytes per pixel (RGB), padded to byte boundary
+                                    int dataSize = bytesPerRow * height;
+                                    byte[] data = new byte[dataSize];
+                                    int bytesRead = 0;
+                                    while (bytesRead < dataSize)
+                                    {
+                                        int n = _stream.Read(data, bytesRead, dataSize - bytesRead);
+                                        if (n == 0)
+                                        {
+                                            e.HasMorePages = false;
+                                            return;
+                                        }
+                                        bytesRead += n;
+                                    }
+
+                                    using Bitmap bmp = new Bitmap(width, height);
+                                    for (int i = 0; i < height; i++)
+                                    {
+                                        for (int j = 0; j < width; j++)
+                                        {
+                                            int index = (i * bytesPerRow) + (j * 3);
+                                            Color c = Color.FromArgb(255, data[index], data[index + 1], data[index + 2]);
+                                            bmp.SetPixel(j, i, c);
+                                        }
+                                    }
+                                    e.Graphics.DrawImage(bmp, xpos, ypos, width, height);
+                                    xpos += width;
+                                    if (xpos > rightMargin)
+                                    {
+                                        xpos = leftMargin;
+                                        if ((ypos + height) > bottomMargin)
+                                        {
+                                            hasMorePages = true;
+                                            ffSeen = false;
+                                            break;
+                                        }
+                                        ypos += height;
+                                    }
+                                }
                                 break;
 
                             default:
@@ -498,7 +568,7 @@ namespace NextPrintServer
         {
             foreach (var item in _items)
             {
-                if (item.Key.Equals(key))
+                if (item != null && item.Key != null && item.Key.Equals(key))
                 {
                     return item.Resource;
                 }

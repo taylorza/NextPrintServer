@@ -26,8 +26,6 @@ namespace NextPrintServer
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            AddAboutMenu();
-
             if (string.IsNullOrEmpty(Properties.Settings.Default.Printer))
             {
                 txtPrinter.Text = _pd.PrinterSettings.PrinterName;
@@ -130,6 +128,7 @@ namespace NextPrintServer
             _previewImage?.Dispose();
 
             _previewImage = new Bitmap((int)Math.Ceiling(width), (int)Math.Ceiling(height));
+            _previewImage.SetResolution(96, 96);
             _previewGraphics = Graphics.FromImage(_previewImage);
 
             _previewGraphics.FillRectangle(Brushes.White, 0, 0, _previewImage.Width, _previewImage.Height);
@@ -194,15 +193,16 @@ namespace NextPrintServer
             ShowForm();
         }
 
-        private void AddAboutMenu()
-        {
-
-        }
-
         private void iPAddressToolStripMenuItem_Click(object sender, EventArgs e)
         {
             IpAddressForm f = new();
             f.ShowDialog(this);
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutDlg dlg = new AboutDlg();
+            dlg.ShowDialog(this);
         }
     }
 }

@@ -64,6 +64,7 @@
             // btnOK
             // 
             btnOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnOK.DialogResult = DialogResult.OK;
             btnOK.Location = new Point(424, 216);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(75, 23);
@@ -85,6 +86,7 @@
             Name = "IpAddressForm";
             StartPosition = FormStartPosition.CenterParent;
             Text = "IP Address";
+            FormClosed += IpAddressForm_FormClosed;
             Load += IpAddressForm_Load;
             ResumeLayout(false);
         }

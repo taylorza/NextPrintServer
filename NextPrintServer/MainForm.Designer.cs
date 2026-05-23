@@ -50,6 +50,8 @@ namespace NextPrintServer
             menuStrip1 = new MenuStrip();
             ipAddressMenuItem = new ToolStripMenuItem();
             iPAddressToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripSeparator();
+            aboutToolStripMenuItem = new ToolStripMenuItem();
             statusStrip1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
             menuStrip1.SuspendLayout();
@@ -183,7 +185,7 @@ namespace NextPrintServer
             // 
             // ipAddressMenuItem
             // 
-            ipAddressMenuItem.DropDownItems.AddRange(new ToolStripItem[] { iPAddressToolStripMenuItem });
+            ipAddressMenuItem.DropDownItems.AddRange(new ToolStripItem[] { iPAddressToolStripMenuItem, toolStripMenuItem2, aboutToolStripMenuItem });
             ipAddressMenuItem.Name = "ipAddressMenuItem";
             ipAddressMenuItem.Size = new Size(44, 20);
             ipAddressMenuItem.Text = "Help";
@@ -191,9 +193,21 @@ namespace NextPrintServer
             // iPAddressToolStripMenuItem
             // 
             iPAddressToolStripMenuItem.Name = "iPAddressToolStripMenuItem";
-            iPAddressToolStripMenuItem.Size = new Size(129, 22);
+            iPAddressToolStripMenuItem.Size = new Size(180, 22);
             iPAddressToolStripMenuItem.Text = "IP Address";
             iPAddressToolStripMenuItem.Click += iPAddressToolStripMenuItem_Click;
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(177, 6);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            aboutToolStripMenuItem.Size = new Size(180, 22);
+            aboutToolStripMenuItem.Text = "About";
+            aboutToolStripMenuItem.Click += aboutToolStripMenuItem_Click;
             // 
             // MainForm
             // 
@@ -245,5 +259,7 @@ namespace NextPrintServer
         private MenuStrip menuStrip1;
         private ToolStripMenuItem ipAddressMenuItem;
         private ToolStripMenuItem iPAddressToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem2;
+        private ToolStripMenuItem aboutToolStripMenuItem;
     }
 }

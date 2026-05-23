@@ -44,6 +44,7 @@
             // btnOK
             // 
             btnOK.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnOK.DialogResult = DialogResult.OK;
             btnOK.Location = new Point(243, 56);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(75, 23);
@@ -62,6 +63,7 @@
             // 
             // AboutDlg
             // 
+            AcceptButton = btnOK;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             CancelButton = btnOK;
