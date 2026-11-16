@@ -22,6 +22,39 @@ namespace NextPrintServer.Linux
         public List<string> LpOptions = new();
     }
 
+    /// <summary>Copies every byte read from a stream to a file, to help diagnose print problems.</summary>
+    internal class CaptureStream(Stream source, Stream capture) : Stream
+    {
+        public override int ReadByte()
+        {
+            int b = source.ReadByte();
+            if (b != -1)
+            {
+                capture.WriteByte((byte)b);
+                capture.Flush();
+            }
+            return b;
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int n = source.Read(buffer, offset, count);
+            capture.Write(buffer, offset, n);
+            capture.Flush();
+            return n;
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public override void Flush() { }
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
     internal static class Program
     {
         private const string Usage = """
@@ -38,7 +71,8 @@ namespace NextPrintServer.Linux
               --paper SIZE          A3, A4, A5, Letter, Legal or WIDTHxHEIGHT in mm (default A4)
               --margin MM           Page margin in mm (default 6)
               --lp-option OPT       Extra option passed to lp as '-o OPT', may be repeated
-              --output-dir DIR      Keep a PDF copy of every print job in DIR
+              --output-dir DIR      Keep a PDF copy of every print job in DIR, together with
+                                    the raw data that was received (.bin)
               --no-print            Do not send jobs to CUPS, requires --output-dir
               --idle-timeout SEC    End a job when no data arrives for SEC seconds (default: wait forever)
               --help                Show this help
@@ -113,21 +147,26 @@ namespace NextPrintServer.Linux
             string fileName = $"zxnext-{DateTime.Now:yyyyMMdd-HHmmss-fff}.pdf";
             string pdfPath = Path.Combine(options.OutputDir ?? Path.GetTempPath(), fileName);
             int pageCount;
+            bool hasContent;
             try
             {
                 using (var output = File.Create(pdfPath))
                 using (var surface = new PdfPrintSurface(output, page, options.Font, options.FontSize))
+                using (var raw = options.OutputDir != null ? File.Create(Path.ChangeExtension(pdfPath, ".bin")) : null)
                 using (var input = new BufferedStream(tcpClient.GetStream()))
                 {
-                    var job = new PrintJob(input, surface);
+                    var job = new PrintJob(raw != null ? new CaptureStream(input, raw) : input, surface);
                     job.Run();
                     pageCount = job.PageCount;
+                    hasContent = job.HasContent;
                 }
 
-                if (pageCount == 0)
+                if (!hasContent)
                 {
+                    // Do not waste a sheet of paper on a job with nothing on it
                     Log("Nothing to print");
                     File.Delete(pdfPath);
+                    if (options.OutputDir != null) Log($"Saved {Path.ChangeExtension(pdfPath, ".bin")}");
                     return;
                 }
 

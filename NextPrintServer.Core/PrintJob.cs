@@ -53,8 +53,14 @@ namespace NextPrintServer.Core
             _surface = surface;
         }
 
-        /// <summary>Number of pages produced. Zero if the job contained nothing printable.</summary>
+        /// <summary>Number of pages produced.</summary>
         public int PageCount { get; private set; }
+
+        /// <summary>
+        /// False if nothing was drawn on any page, for example when the job is only line
+        /// feeds and the form feed the driver sends at the end of every job.
+        /// </summary>
+        public bool HasContent { get; private set; }
 
         /// <summary>Reads the stream to its end, rendering pages as it goes.</summary>
         public void Run()
@@ -243,6 +249,7 @@ namespace NextPrintServer.Core
                                     }
 
                                     EnsurePage();
+                                    HasContent |= c != ' ' || _underline;
                                     _surface.DrawChar(c, _style, _color, xpos, ypos);
                                     if (_underline)
                                     {
@@ -313,6 +320,7 @@ namespace NextPrintServer.Core
                                     if (width > 0 && height > 0)
                                     {
                                         EnsurePage();
+                                        HasContent = true;
                                         _surface.DrawBitmap(data, width, height, xpos, ypos);
                                     }
 

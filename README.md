@@ -64,7 +64,7 @@ The addresses to use on the ZX Spectrum Next are shown at startup.
 | `--paper SIZE` | A3, A4, A5, Letter, Legal or WIDTHxHEIGHT in mm (default A4) |
 | `--margin MM` | Page margin in mm (default 6) |
 | `--lp-option OPT` | Extra option passed to `lp` as `-o OPT`, may be repeated |
-| `--output-dir DIR` | Keep a PDF copy of every print job in DIR |
+| `--output-dir DIR` | Keep a PDF copy of every print job in DIR, together with the raw data that was received (`.bin`) |
 | `--no-print` | Do not send jobs to CUPS, requires `--output-dir` |
 | `--idle-timeout SEC` | End a job when no data arrives for SEC seconds (default: wait forever) |
 
