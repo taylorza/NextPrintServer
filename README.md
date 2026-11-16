@@ -35,8 +35,11 @@ Windows Printer Server to support Network Printing from the ZX Spectrum Next usi
 ## Linux version (including ARM / Raspberry Pi)
 `NextPrintServer.Linux` is a console version of the server for Linux. It has no window; each print job is rendered to a PDF and sent to a [CUPS](https://www.cups.org/) printer with `lp`. It supports the same control codes as the Windows version.
 
+### Download
+Ready-to-run builds for x64, 64-bit ARM and 32-bit ARM are available from the [0.2.3-linux release](https://github.com/m0jek/NextPrintServer/releases/tag/0.2.3-linux). They are self-contained, .NET does not need to be installed. Extract the archive for your machine, then see [Requirements](#requirements-on-the-target-machine) and [Run](#run) below.
+
 ### Build
-Requires the .NET 8 SDK. The build can be done on any machine, including Windows or an x64 Linux PC.
+To build it yourself you need the .NET 8 SDK. The build can be done on any machine, including Windows or an x64 Linux PC.
 
 ```
 dotnet publish NextPrintServer.Linux -c Release -r linux-arm64 --self-contained -p:PublishSingleFile=true -o publish
