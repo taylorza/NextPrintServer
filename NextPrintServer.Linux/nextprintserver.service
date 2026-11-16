@@ -1,0 +1,13 @@
+[Unit]
+Description=ZX Spectrum Next print server
+After=network-online.target cups.service
+Wants=network-online.target
+
+[Service]
+# Adjust the path and options, see 'nextprintserver --help'
+ExecStart=/opt/nextprintserver/nextprintserver --paper A4
+Restart=on-failure
+DynamicUser=yes
+
+[Install]
+WantedBy=multi-user.target
